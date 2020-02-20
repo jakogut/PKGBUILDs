@@ -5,7 +5,7 @@
 buildarch=8
 
 pkgname=uboot-orangepi4-git
-pkgver=2020.01.r620.g2d2f91a480
+pkgver=2020.04rc2.r48.gf2a73d6867
 pkgrel=1
 _srcname=u-boot
 pkgdesc="U-Boot for Orange Pi 4"
@@ -18,7 +18,7 @@ install=${pkgname}.install
 _commit_rkbin=5aa9a92b5652d37b323c870329103e120dfc8d87
 source=("git+https://gitlab.denx.de/u-boot/u-boot"
         "git+https://github.com/ARM-software/arm-trusted-firmware.git"
-	"0001-add-orangepi4-makefile.patch"
+	"add-board-orangepi-4.patch"
         'boot.txt'
         'mkscr')
 md5sums=('SKIP'
@@ -34,7 +34,7 @@ pkgver() {
 
 prepare() {
   cd ${srcdir}/${_srcname}
-  patch -p1 -i ../0001-add-orangepi4-makefile.patch
+  patch -p1 -i ../add-board-orangepi-4.patch
 }
 
 build() {
@@ -46,17 +46,7 @@ build() {
 
   cd ${srcdir}/${_srcname}
 
-  # Fixup DDR4 support for Orange Pi 4
-  cp configs/orangepi{-rk3399,4}_defconfig
-  echo 'CONFIG_RAM_RK3399_LPDDR4=y' >> configs/orangepi4_defconfig
-  sed -i "s|CONFIG_DEFAULT_FDT_FILE=\"rockchip/rk3399-orangepi.dtb\"|CONFIG_DEFAULT_FDT_FILE=\"rk3399-orangepi4.dtb\"|" configs/orangepi4_defconfig
-  sed -i "s|CONFIG_DEFAULT_DEVICE_TREE=\"rk3399-orangepi\"|CONFIG_DEFAULT_DEVICE_TREE=\"rk3399-orangepi4\"|" configs/orangepi4_defconfig
-
-  cp arch/arm/dts/rk3399-orangepi{,4}.dts
-  cp arch/arm/dts/rk3399-{rockpro64,orangepi4}-u-boot.dtsi
-
-  make orangepi4_defconfig
-
+  make orangepi-4-rk3399_defconfig
   echo 'CONFIG_IDENT_STRING=" Arch Linux ARM"' >> .config
   make EXTRAVERSION=-${pkgrel} BL31=${srcdir}/arm-trusted-firmware/build/rk3399/release/bl31/bl31.elf
 }
